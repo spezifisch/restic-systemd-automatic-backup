@@ -1,2 +1,5 @@
-b2_env.sh
-b2_pw.txt
+*_env.sh
+*_pw.txt
+env.sh
+pw.txt
+

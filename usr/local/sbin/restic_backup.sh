@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Make backup my system with restic to Backblaze B2.
+# Make backup my system with restic.
 # This script is typically run by: /etc/systemd/system/restic-backup.{service,timer}
 
 # Exit on failure, pipe failure
@@ -21,27 +21,17 @@ RETENTION_WEEKS=16
 RETENTION_MONTHS=18
 RETENTION_YEARS=3
 
-# What to backup, and what to not
-BACKUP_PATHS="/ /boot /home"
-[ -d /mnt/media ] && BACKUP_PATHS+=" /mnt/media"
-BACKUP_EXCLUDES="--exclude-file /etc/restic/backup_exclude"
-for dir in /home/*
-do
-	if [ -f "$dir/.backup_exclude" ]
-	then
-		BACKUP_EXCLUDES+=" --exclude-file $dir/.backup_exclude"
-	fi
-done
-
 BACKUP_TAG=systemd.timer
+OPTIONS=
 
-
-# Set all environment variables like
-# B2_ACCOUNT_ID, B2_ACCOUNT_KEY, RESTIC_REPOSITORY etc.
-source /etc/restic/b2_env.sh
-
-# How many network connections to set up to B2. Default is 5.
-B2_CONNECTIONS=50
+# Set all environment variables.
+# The following must be set at least:
+# - BACKUP_PATHS (example: "/ /boot /home")
+# - BACKUP_EXCLUDES (example: "--exclude-file /etc/restic/backup_exclude --exclude-file /root/.backup_exclude")
+# Optional:
+# - OPTIONS (example: "--option b2.connections=50")
+# You can also override the values above.
+source /etc/restic/env.sh
 
 # NOTE start all commands in background and wait for them to finish.
 # Reason: bash ignores any signals while child process is executing and thus my trap exit hook is not triggered.
@@ -60,8 +50,8 @@ restic backup \
 	--verbose \
 	--one-file-system \
 	--tag $BACKUP_TAG \
-	--option b2.connections=$B2_CONNECTIONS \
 	$BACKUP_EXCLUDES \
+	$OPTIONS \
 	$BACKUP_PATHS &
 wait $!
 
@@ -71,8 +61,8 @@ wait $!
 restic forget \
 	--verbose \
 	--tag $BACKUP_TAG \
-	--option b2.connections=$B2_CONNECTIONS \
-        --prune \
+	$OPTIONS \
+	--prune \
 	--group-by "paths,tags" \
 	--keep-daily $RETENTION_DAYS \
 	--keep-weekly $RETENTION_WEEKS \
@@ -86,3 +76,4 @@ wait $!
 #wait $!
 
 echo "Backup & cleaning is done."
+
