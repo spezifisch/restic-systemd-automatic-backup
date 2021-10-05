@@ -1,0 +1,16 @@
+/.snapshots/
+/opt
+/root/.cache/
+/usr/share/**/*.html
+/usr/share/help/
+/usr/share/licenses/
+/usr/share/man/
+/usr/src/
+/var/cache/
+/var/log/
+/mnt/c/**/AppData/**/cache
+/mnt/c/**/AppData/**/cache2
+/mnt/c/**/AppData/**/*Cache*
+/mnt/c/**/AppData/Roaming/Mozilla/**/parent.lock
+/mnt/c/**/AppData/Roaming/Thunderbird/**/parent.lock
+

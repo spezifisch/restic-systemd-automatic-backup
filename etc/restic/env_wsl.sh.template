@@ -1,0 +1,19 @@
+# Extracted settings so both systemd timers and user can just source this when want to work on my backup.
+# See https://restic.readthedocs.io/en/latest/030_preparing_a_new_repo.html
+
+export RESTIC_REPOSITORY="rest:http://foo:bar@example.com/baz"
+export RESTIC_PASSWORD_FILE="/etc/restic/pw.txt"
+
+# What to backup, and what to not
+BACKUP_PATHS=( /etc /home /mnt/c/Users/username/{Documents,Pictures,AppData/Roaming} )
+export BACKUP_PATHS=${BACKUP_PATHS[@]}
+
+BACKUP_EXCLUDES="--exclude-file /etc/restic/backup_exclude"
+for dir in /home/*
+do
+	if [ -f "$dir/.backup_exclude" ]
+	then
+		BACKUP_EXCLUDES+=" --exclude-file $dir/.backup_exclude"
+	fi
+done
+
